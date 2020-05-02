@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+  dns:
+    build: 
+      dockerfile: images/dns.dockerfile
+      context: .
+    volumes:
+      - ./bindconfig/ns1/:/etc/bind:ro
+    ports:
+      - "53:53/tcp"
+    networks:
+      dns-local:
+        ipv4_address: 19.19.19.9
+  
+  host: 
+    build:
+      dockerfile: images/host.dockerfile
+      context: .
+    volumes: 
+      - ./resolv.conf:/etc/resolv.conf:ro
+    command: tail -f /dev/null
+    networks:
+      dns-local:
+        ipv4_address: 19.19.19.8
+
+networks:
+  dns-local:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 19.19.19.0/24
